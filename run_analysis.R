@@ -12,10 +12,10 @@
 wd<-"C:/Users/mmont/OneDrive/Documents/R/Codigos/Ciencia Datos/03 - Getting and Cleaning Data/Project"
 setwd(wd)
 #0.2.- Download data
-# urldir<-"https://d396qusza40orc.cloudfront.net/getdata%2Fprojectfiles%2FUCI%20HAR%20Dataset.zip"
-# download.file(urldir,destfile = "projectdata.zip")
-# #0.3.- Unzip data
-# unzip("projectdata.zip")
+urldir<-"https://d396qusza40orc.cloudfront.net/getdata%2Fprojectfiles%2FUCI%20HAR%20Dataset.zip"
+download.file(urldir,destfile = "projectdata.zip")
+#0.3.- Unzip data
+unzip("projectdata.zip")
 #0.4.- Loading data
 #0.4.1.- Loading general data
 activity_labels<-read.delim("UCI HAR Dataset/activity_labels.txt",
@@ -47,29 +47,7 @@ list_test<-list(read.table("UCI HAR Dataset/test/subject_test.txt",
                  read.table("UCI HAR Dataset/test/X_test.txt",
                    header = FALSE))
 
-#0.4.3.- Creating ID for test data
-#ID is composed by 3 identifications in the form: AA-B-CCC.
-# AA is a 2 digits integer that represents the ID of the subject
-# B is a 1 digit integer that represents the activity, acording to the activity label
-# CCC is a 3 digits correlative integer that represents each observation.
-
-# ID_test<-
-
-#0.4.4.- Naming test list
-names(list_test)<-c("Subject",
-                    "Activity",
-                    "BodyAccelerationX",
-                    "BodyAccelerationY",
-                    "BodyAccelerationZ",
-                    "BodyGyroscopeX",
-                    "BodyGyroscopeY",
-                    "BodyGyroscopeZ",
-                    "TotalAccelerationX",
-                    "TotalAccelerationY",
-                    "TotalAccelerationZ",
-                    "Set")
-
-#0.4.4.- Loading train data
+#0.4.3.- Loading train data
 list_train<-list(read.table("UCI HAR Dataset/train/subject_train.txt",
                             header = FALSE),
                  read.table("UCI HAR Dataset/train/Y_train.txt",
@@ -95,18 +73,21 @@ list_train<-list(read.table("UCI HAR Dataset/train/subject_train.txt",
                  read.table("UCI HAR Dataset/train/X_train.txt",
                             header = FALSE))
 
-names(list_train)<-c("Subject",
-                     "Activity",
-                     "BodyAccelerationX",
-                     "BodyAccelerationY",
-                     "BodyAccelerationZ",
-                     "BodyGyroscopeX",
-                     "BodyGyroscopeY",
-                     "BodyGyroscopeZ",
-                     "TotalAccelerationX",
-                     "TotalAccelerationY",
-                     "TotalAccelerationZ",
-                     "Set")
+#0.5.- Naming lists
+names(list_test)<-c("Subject",
+                    "Activity",
+                    "BodyAccelerationX",
+                    "BodyAccelerationY",
+                    "BodyAccelerationZ",
+                    "BodyGyroscopeX",
+                    "BodyGyroscopeY",
+                    "BodyGyroscopeZ",
+                    "TotalAccelerationX",
+                    "TotalAccelerationY",
+                    "TotalAccelerationZ",
+                    "Set")
+
+names(list_train)<-names(list_test)
 
 #1.- Calculating means and standard deviation for each measurement
 #1.1.- Setting new variables
@@ -171,6 +152,7 @@ rm(df_test,
    list_test,
    list_train,
    i,
+   urldir,
    names_test_mean,
    names_test_sd,
    names_train_mean,
@@ -178,15 +160,15 @@ rm(df_test,
    wd,
    activity_labels)
 
-#4.- Creating a data set with the average of each variable for each activity
+#3.- Creating a data set with the average of each variable for each activity
 # and each subject.
-#4.1.-Creating an ID
+#3.1.- Creating an ID
 dfTemp<-mutate(Observations[,1:12],
                       ID=paste0(Subject,"-",Activity),
                       .before = Subject)
 dfTemp$ID<-as.factor(dfTemp$ID)
 
-#4.2.- Setting ID's [,1], Subjects [,2] and Activities [,3] in 
+#3.2.- Setting ID's [,1], Subjects [,2] and Activities [,3] in 
 #       ObservationsSummary table
 ObservationsSummary<-dfTemp[1:length(levels(dfTemp$ID)),] #Creating
 
@@ -201,12 +183,12 @@ secondElement<-function(x){x[2]}
 ObservationsSummary[,2]<-sapply(namesObservations,firstElement)
 ObservationsSummary[,3]<-sapply(namesObservations,secondElement)
 
-#4.3.- Obtaining averages by ID
+#3.3.- Obtaining averages by ID
 for (i in 4:ncol(dfTemp)){
   ObservationsSummary[,i]<-tapply(dfTemp[,i],dfTemp[,1],mean)
 }
 
-#4.3.- Clearing environment
+#3.3.- Clearing environment
 rm(dfTemp,
    dfTemp2,
    namesObservations,
@@ -214,7 +196,7 @@ rm(dfTemp,
    secondElement,
    i)
 
-#5.- Writing txt's
+#4.- Writing txt's
 write.table(ObservationsSummary, file="Observations.txt",row.name=FALSE)
 write.table(ObservationsSummary, file="ObservationsSummary.txt",row.name=FALSE)
 
